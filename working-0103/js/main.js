@@ -1,7 +1,27 @@
-function init() {
-    var getId = function(id) {
-        return document.getElementById(id);
-    };
+function getById(id) {
+    "use strict";
+    return document.getElementById(id);
+}
+
+function initStats() {
+    "use strict";
+
+    var stats = new Stats();
+
+    stats.setMode(0);
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    stats.domElement.style.left = '0px';
+
+    getById('stats-output').appendChild(stats.domElement);
+
+    return stats;
+}
+
+function initScene() {
+    "use strict";
+
+    var stats = initStats();
 
     var scene = new THREE.Scene();
 
@@ -69,11 +89,32 @@ function init() {
     camera.position.x=-30;
     camera.position.y=40;
     camera.position.z=30;
-    camera.lookAt(scene.position);;
+    camera.lookAt(scene.position);
 
-    getId("webgl-output").appendChild(renderer.domElement);
-    renderer.render(scene, camera);
+    //Needs to be defined outside of the renderScene
+    //Or else step is always starts at 0 and doesn't work.
+    var step = 0;
+
+    function renderScene() {
+        stats.update();
+
+        //animate the cube - rotate around all axes.
+        cube.rotation.x += 0.02;
+        cube.rotation.y += 0.02;
+        cube.rotation.z += 0.02;
+
+        //animate the sphere - bounce the sphere.
+        step += 0.04;
+        sphere.position.x = 20 + (10 * (Math.cos(step)));
+        sphere.position.y = 2 + (10 * (Math.abs(Math.cos(step))));
+
+        requestAnimationFrame(renderScene);
+        renderer.render(scene, camera);
+    }
+
+    getById("webgl-output").appendChild(renderer.domElement);
+    renderScene();
 
 }
 
-window.onload = init();
+window.onload = initScene();
